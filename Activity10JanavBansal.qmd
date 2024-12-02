@@ -1,0 +1,178 @@
+---
+title: "Tortilla Price Analysis"
+subtitle: "STAT 184 Homework"
+author: "Janav Bansal"
+date: "2024-02-12"
+format:
+  html:
+    code-fold: false
+    self-contained: true
+---
+
+## Question 1
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+
+# Define the function first
+myFunction <- function(x) {
+  (cos(4*x) + tan(0.5*x))^4
+}
+
+# Then create the plot
+ggplot() +
+  stat_function(fun = myFunction, n = 1000,
+                xlim = c(0, 1)) +
+  theme_minimal() +
+  labs(x = "x", y = "h(x)",
+       title = "h(x) = [cos(4x) + tan(0.5x)]^4") +
+  theme_bw()
+```
+
+## Question 2
+
+```{r}
+#| echo: true  # This ensures both code and plot are shown
+#| warning: false
+#| message: false
+
+# Define the function first
+myFunction <- function(x) {
+  (cos(4*x) + tan(0.5*x))^4
+}
+
+# Then create the plot
+ggplot() +
+  stat_function(fun = myFunction, n = 1000,
+                xlim = c(0, 1)) +
+  theme_minimal() +
+  labs(x = "x", y = "h(x)",
+       title = "h(x) = [cos(4x) + tan(0.5x)]^4") +
+  theme_bw()
+
+
+
+```
+
+## Question 3
+
+### Tasks (a), (b), and (c)
+
+```{r}
+
+#| warning: false
+#| message: false
+
+# Load required libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Read the data
+tortilla_data <- read.csv("tortilla_data.csv")
+
+# Task a: 2007 average price
+avg_2007 <- tortilla_data %>%
+  filter(year == 2007) %>%
+  summarise(avg_price = mean(price)) %>%
+  pull(avg_price)
+
+# Task b: 2024 average price
+avg_2024 <- tortilla_data %>%
+  filter(year == 2024) %>%
+  summarise(avg_price = mean(price)) %>%
+  pull(avg_price)
+
+# Task c: Percent change
+percent_change <- ((avg_2024 - avg_2007)/avg_2007) * 100
+
+# Print results
+cat("Average price in 2007:", round(avg_2007, 2), "pesos\n")
+cat("Average price in 2024:", round(avg_2024, 2), "pesos\n")
+cat("Percent change:", round(percent_change, 2), "%\n")
+```
+
+### Task (d): Average Price Trend
+
+```{r}
+#| fig.cap: "Average Tortilla Prices Over Time (2007-2024)"
+
+# Calculate yearly averages
+yearly_avg <- tortilla_data %>%
+  group_by(year) %>%   
+  summarise(avg_price = mean(price)) 
+
+# Create the plot
+ggplot(yearly_avg, aes(x = year, y = avg_price)) +  
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(x = "Year", 
+       y = "Average Price (Pesos/kg)",
+       title = "Average Tortilla Prices in Mexican Border States")
+
+```
+
+### Task (e): 2016 Analysis
+
+```{r}
+#| warning: false
+#| message: false
+#| fig.cap: "Distribution of Tortilla Prices by State in 2016"
+
+# 2016 summary statistics
+stats_2016 <- tortilla_data %>%
+  filter(year == 2016) %>%
+  group_by(state) %>%
+  summarise(
+    Mean = mean(price),
+    Median = median(price),
+    SD = sd(price)
+  )
+
+# Create boxplot for price distribution by state
+tortilla_data %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = state, y = price)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Tortilla Prices by State (2016)",
+       x = "State",
+       y = "Price (Pesos/kg)")
+
+# Display summary statistics table
+knitr::kable(stats_2016, 
+             caption = "Summary Statistics by State (2016)")
+```
+
+### Task (f): Nuevo León Analysis
+
+```{r}
+#| fig.cap: "Tortilla Prices by Store Type in Nuevo León (2007-2024)"
+
+# Filter for Nuevo León and create plot
+nuevo_leon_data <- tortilla_data %>%
+  filter(state == "Nuevo León")
+
+ggplot(nuevo_leon_data, aes(x = year, y = price, color = storeType, group = storeType)) + 
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Tortilla Prices by Store Type in Nuevo León",
+       x = "Year",
+       y = "Price (Pesos/kg)",
+       color = "Store Type")
+```
+
+### Task (g): Tortilla Image
+
+![Homemade flour tortillas. Source: Muy Delish (www.muydelish.com/flour-tortillas/)](download.jpg)
+
+### Task (h): Data Source
+
+\[\^1:Data Source:Rick Chavelas via Kaggle at https://www.kaggle.com/datasets/richave/tortilla-prices-in-mexico\]
